@@ -1,5 +1,3 @@
-// mpic++ -o run12 10numerical_derivative_parallel.cpp
-// mpirun -np 4 ./run12
 
 #include <iostream>
 #include <mpi.h>
