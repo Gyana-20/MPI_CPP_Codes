@@ -5,5 +5,5 @@
 
 ## Requirements
 - C++ compiler
-- MPI (OPENMPI OR MPICH)
+- MPI (openMPI or MPICH)
 
