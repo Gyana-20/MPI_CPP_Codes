@@ -1,3 +1,18 @@
+/*
+Program: 
+- Parallel Numerical Differentiation
+- MPI cartesian topology is used
+- Ghost cell exchange among neighbours
+- higher order approximation of derivatives is used
+
+Author:
+Gyana Ranjan Nayak
+
+Usage:
+mpic++ -o {exe name} {program name.cpp}
+mpirun -np {number of processors} ./{exe name}
+*/
+
 
 #include <iostream>
 #include <mpi.h>
@@ -58,10 +73,10 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // Allocate space for local points and ghost points (2 ghost points on each side)
+    
     double* lx = new double[lnpt + 4]; // +4 for 2 ghost points on each side
 
-    // Set up scatter counts and displacements for Scatterv
+   v
     int* send_cnt = new int[np];
     int* send_dis = new int[np];
 
@@ -70,67 +85,62 @@ int main(int argc, char** argv) {
         send_dis[i] = (i == 0) ? 0 : send_dis[i - 1] + send_cnt[i - 1];
     }
 
-    // Scatter points to each process
+   
     MPI_Scatterv(x, send_cnt, send_dis, MPI_DOUBLE, lx + 2, lnpt, MPI_DOUBLE, 0, comm);
 
-    // Exchange two ghost points between neighboring processes
+    
     if (rank != 0) {
-        MPI_Send(&lx[2], 2, MPI_DOUBLE, rank - 1, 100, comm); // send first two local points to the left neighbor
-        MPI_Recv(&lx[0], 2, MPI_DOUBLE, rank - 1, 100, comm, &status); // receive two ghost points from the left neighbor
+        MPI_Send(&lx[2], 2, MPI_DOUBLE, rank - 1, 100, comm); 
+        MPI_Recv(&lx[0], 2, MPI_DOUBLE, rank - 1, 100, comm, &status); 
     }
 
     if (rank != np - 1) {
-        MPI_Send(&lx[lnpt], 2, MPI_DOUBLE, rank + 1, 100, comm); // send last two local points to the right neighbor
-        MPI_Recv(&lx[lnpt + 2], 2, MPI_DOUBLE, rank + 1, 100, comm, &status); // receive two ghost points from the right neighbor
+        MPI_Send(&lx[lnpt], 2, MPI_DOUBLE, rank + 1, 100, comm); 
+        MPI_Recv(&lx[lnpt + 2], 2, MPI_DOUBLE, rank + 1, 100, comm, &status); 
     }
 
-    // Allocate space for local derivatives
+    
     double* ldf = new double[lnpt];
 
-    // Compute local derivatives
+    
     if (rank == 0) {
-        // First process: forward difference for the first point, central difference for the rest
         for (int i = 0; i < lnpt; i++) {
             if (i == 0 || i==1) {
-                // Forward difference for the very first point
                 ldf[i] = (-3 * f(lx[2]) + 4 * f(lx[3]) - f(lx[4])) / (2 * h);
-            } else if (i == lnpt - 1 && np == 1) {
-                // If only one process, backward difference for the last point
+            } 
+            else if (i == lnpt - 1 && np == 1) {
                 ldf[i] = (3 * f(lx[lnpt + 1]) - 4 * f(lx[lnpt]) + f(lx[lnpt - 1])) / (2 * h);
-            } else {
-                // Central difference for the other points
+            } 
+            else {
                 ldf[i] = (-f(lx[i + 4]) + 8 * f(lx[i + 3]) - 8 * f(lx[i + 1]) + f(lx[i])) / (12 * h);
             }
         }
     } else if (rank == np - 1) {
-        // Last process: backward difference for the last point, central difference for the rest
         for (int i = 0; i < lnpt; i++) {
             if (i == lnpt - 1 || i==lnpt-2) {
-                // Backward difference for the last point
                 ldf[i] = (3 * f(lx[lnpt + 1]) - 4 * f(lx[lnpt]) + f(lx[lnpt - 1])) / (2 * h);
-            } else {
-                // Central difference for the other points
+            } 
+            else {
                 ldf[i] = (-f(lx[i + 4]) + 8 * f(lx[i + 3]) - 8 * f(lx[i + 1]) + f(lx[i])) / (12 * h);
             }
         }
     } else {
-        // Other processes: use central difference for all points
+        
         for (int i = 0; i < lnpt; i++) {
             ldf[i] = (-f(lx[i + 4]) + 8 * f(lx[i + 3]) - 8 * f(lx[i + 1]) + f(lx[i])) / (12 * h);
         }
     }
 
-    // Gather all local derivatives to the root process
+   
     MPI_Gatherv(ldf, lnpt, MPI_DOUBLE, df, send_cnt, send_dis, MPI_DOUBLE, 0, comm);
-
-    // Write the result to a file in the root process
-    if (rank == 0) {
+    
  if (rank == 0) {
-    std::cout << "Writing to file..." << std::endl;
-    fptr.open("10plot_parallel_data.txt");
-    for (int i = 0; i < num_points; i++) {
-        fptr << x[i] << " " << f_prime(x[i]) << " " << df[i] << std::endl;
-    }
+     if (rank == 0) {
+        std::cout << "Writing to file..." << std::endl;
+        fptr.open("10plot_parallel_data.txt");
+        for (int i = 0; i < num_points; i++) {
+            fptr << x[i] << " " << f_prime(x[i]) << " " << df[i] << std::endl;
+        }
     fptr.close();
     std::cout << "File writing complete." << std::endl;
 }
