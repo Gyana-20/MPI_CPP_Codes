@@ -1,6 +1,6 @@
 # Details:
--Parallel Implementation of Numerical Algorithms in MPI and  C++ .
--In some codes serial implementation has been added to the folder.
+- Parallel Implementation of Numerical Algorithms in MPI and  C++ .
+- In some codes serial implementation has been added to the folder.
 
 
 
