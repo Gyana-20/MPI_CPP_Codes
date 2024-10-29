@@ -1,8 +1,10 @@
-# MPI_CPP_Codes
-Parallel Implementation of Numerical Algorithms in MPI and  C++ is done.
+# Details:
+-Parallel Implementation of Numerical Algorithms in MPI and  C++ .
+-In some codes serial implementation has been added to the folder.
 
 
-## Requirements
+
+# Requirements
 - C++ compiler
 - MPI (openMPI or MPICH)
 
