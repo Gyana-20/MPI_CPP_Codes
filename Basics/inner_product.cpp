@@ -14,8 +14,9 @@ Program:
   the final result is  obtained and stored in all the 
   processes.
 
-- All the process print their stored results.
-
+- All the process print their stored results.(commented)
+  Process 0 prints the results.
+  
 Author: GYANA RANJAN NAYAK
 
 Usage:
@@ -26,6 +27,7 @@ mpirun -np {nprocs} ./{exe}
 
 # include <iostream>
 # include <random>
+# include <iomanip>
 # include <mpi.h>
 
 double inner_prod(double* a, double* b, int N){
@@ -66,9 +68,16 @@ int main(int argc, char** argv){
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    double time_0 = MPI_Wtime();
+
     if (rank == 0){
         std::cout<<"Enter the dimension of the vectors: ";
         std::cin>>dim;
+
+        if (dim <=0){
+            std::cerr<<"Error: dimension must be positive."<<std::endl;
+            MPI_Abort(MPI_COMM_WORLD, 1);
+        }
 
         a = new double [dim];
         b = new double [dim];
@@ -118,9 +127,18 @@ int main(int argc, char** argv){
     MPI_Allreduce (&local_inner_prod, &global_inner_prod,
                   1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    std::cout<<"Rank "<<rank<<" || value:"<<global_inner_prod<<std::endl;
+
+    // uncomment the below to see the values stored in each process
+    // every process will have the same value
+    // I am printining it on process 0;
+    // std::cout<<"Rank "<<rank<<" || value:"<<global_inner_prod<<std::endl; 
+
+    double time_1 = MPI_Wtime();
 
     if (rank == 0){
+        std::cout<<std::fixed<<std::setprecision(10);
+        std::cout<<"Inner Product value: "<<global_inner_prod<<std::endl;
+        std::cout<<"Time elapsed: "<<time_1 - time_0 <<" sec"<<std::endl;
         delete[] a;
         delete[] b;
     }
